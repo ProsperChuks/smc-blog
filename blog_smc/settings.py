@@ -45,10 +45,9 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework.authtoken',
     'ckeditor',
+    'ckeditor_uploader',
 
     'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
 ]
 
 MIDDLEWARE = [
@@ -118,10 +117,21 @@ WSGI_APPLICATION = 'blog_smc.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'smcblog',
+        'USER': 'postgres',
+       'PASSWORD': 'passcode',
+       'HOST': 'localhost',
+       'PORT': '8008',
     }
 }
 
@@ -162,10 +172,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'backend/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "backend/static/")
 
 MEDIA_URL = 'backend/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "backend/media/")
+
+
+# CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
+CKEDITOR_UPLOAD_PATH = "uploads"
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'height': 300,
+        'width': '100%',
+    },
+}
+
+CKEDITOR_RESTRICT_BY_USER = False
+CKEDITOR_UPLOAD_SLUGIFY_FILENAME = False
+CKEDITOR_IMAGE_BACKEND = None
+CKEDITOR_ALLOW_NONIMAGE_FILES = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

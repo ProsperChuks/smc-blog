@@ -6,7 +6,7 @@ from ckeditor.fields import RichTextField
 # Create your models here.
 class User(AbstractUser):
     name = models.CharField(max_length=200, verbose_name='Name', help_text='Name to be displayed under blog posts')
-    slug =  models.SlugField(verbose_name='Slug', unique=True, blank=False, null=False)
+    slug =  models.SlugField(max_length=5500, verbose_name='Slug', unique=True, blank=False, null=False)
     image = models.ImageField(upload_to='author', verbose_name='Image', blank=True, null=True)
     bio = models.TextField(verbose_name='Bio', blank=True, null=True)
     email = models.EmailField(unique=True, max_length=50,  blank=False, null=False)
@@ -31,7 +31,7 @@ class category(models.Model):
     )
 
     cat_title = models.CharField(max_length=200, verbose_name='Category Title', choices=cat, default='---')
-    slug =  models.SlugField(verbose_name='Slug', unique=True)
+    slug =  models.SlugField(max_length=5500, verbose_name='Slug', unique=True)
     # description = models.TextField(max_length=500, verbose_name='Category Description')
     
     def __str__(self) -> str:
@@ -45,7 +45,7 @@ class post(models.Model):
         to_field='slug'
     )
     title = models.CharField(max_length=200, verbose_name='Title')
-    slug =  models.SlugField(verbose_name='Slug', unique=True)
+    slug =  models.SlugField(max_length=5500, verbose_name='Slug', unique=True)
     picked = models.BooleanField(verbose_name='Editors Pick')
     author = models.ForeignKey(User, on_delete=models.CASCADE, to_field='slug')
     publishedAt = models.DateTimeField(auto_now_add=True, verbose_name='Published At')
@@ -85,6 +85,3 @@ class comment(models.Model):
 
     def __str__(self):
         return 'Comment {} by {}'.format(self.body, self.name)
-
-# class blockContent(models.Model):
-
