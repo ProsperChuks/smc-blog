@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-ywz!bd#r_02!vp^5!&6-j7h+)0xl)424fwc)pa8vu^0c(35&!0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -91,6 +91,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://smcdesk.com',
 )
 
 ROOT_URLCONF = 'blog_smc.urls'
