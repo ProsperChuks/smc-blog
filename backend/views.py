@@ -7,8 +7,8 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
-from django.core.mail import send_mail
-from django.conf import settings
+from email.message import EmailMessage
+from email.utils import formatdate, make_msgid
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
@@ -58,12 +58,15 @@ class postViewSet(viewsets.ModelViewSet):
         category = self.request.query_params.get('category')
         editor = self.request.query_params.get('editor')
         user = self.request.query_params.get('user')
+        name = self.request.query_params.get('name')
         if user is not None:
             queryset = queryset.filter(author=user)
         if category is not None:
             queryset = queryset.filter(categories__exact=category)
         if editor is not None:
             queryset = queryset.filter(picked__exact=editor)
+        if name is not None:
+            queryset = queryset.filter(title__icontains=name)
         return queryset
 
 class postSubscribe(viewsets.ModelViewSet):
@@ -77,29 +80,33 @@ class postSubscribe(viewsets.ModelViewSet):
         serializer = subscribeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            email = request.POST.get('email')
+            email = request.data['email']
             PORT = 465
-            smtp_server = 'smtp.gmail.com'
-            sender_email = 'devhive217@gmail.com'
-            password = 'dev31997'
-            subject = 'NewsLetter Subscription'
-            message = '''From: From <noreply@blogsmc.com>
-            Subject: NewsLetter Subscription
-            
-            Thanks for subscribing to our Newsletter. 
-            
-            You will get notification of latest articles posted on our website. Please do not reply on this email.
-            '''
-            email_from = settings.EMAIL_HOST_USER
+            smtp_server = 'smtp.mail.yahoo.com'
+            login = 'pchukwudi36@yahoo.com'
+            password = 'yttwsfqiqjtkymlu'
+            email_from = 'pchukwudi36@yahoo.com'
             recipient_list = [email, ]
-            # send_mail(subject, message, email_from, recipient_list, fail_silently=False)
+            print(email)
+            
+            text = """Thanks for subscribing to our Newsletter. \nYou will get notification of latest articles posted on our website. Please do not reply on this email."""
 
-            # context = ssl.create_default_context()
-            # with smtplib.SMTP_SSL(smtp_server, PORT) as server:
-            #     # server.starttls(context=context)
-            #     # server.ehlo()  # Can be omitted
-            #     server.login(sender_email, password)
-            #     server.sendmail(email_from, recipient_list, message)
+            message = EmailMessage()
+            message['From'] = 'pchukwudi36@yahoo.com'
+            message['To'] = f'{email}'
+            message['Subject'] = 'NewsLetter Subscription'
+            message['Date'] = formatdate(localtime=True)
+            message['Message-ID'] = make_msgid()
+            message.set_content(text)
+
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(smtp_server, PORT) as server:
+                server.set_debuglevel(1)
+                server.ehlo()
+                # server.ehlo()  # Can be omitted
+                server.login(login, password)
+                server.send_message(message, email_from, recipient_list)
+                server.quit()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

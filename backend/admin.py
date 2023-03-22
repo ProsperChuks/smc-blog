@@ -11,7 +11,7 @@ class UserCreationFormExtended(UserCreationForm):
 UserAdmin.add_form = UserCreationFormExtended
 UserAdmin.add_fieldsets = (
     (None, {
-        'fields': ('email', 'name', 'slug', 'password1', 'password2',)
+        'fields': ('email', 'name', 'username', 'slug', 'password1', 'password2',)
     }),
 )
 
