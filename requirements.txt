@@ -6,6 +6,7 @@ coreapi==2.3.3
 coreschema==0.0.4
 cryptography==39.0.2
 defusedxml==0.7.1
+dj-database-url==1.2.0
 Django==3.2.18
 django-admin-volt==1.0.10
 django-allauth==0.53.0
@@ -19,6 +20,7 @@ django-templated-mail==1.1.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==4.8.0
 djoser==2.1.0
+gunicorn==20.1.0
 idna==3.4
 importlib-metadata==1.7.0
 itypes==1.2.0
@@ -26,7 +28,7 @@ Jinja2==3.1.2
 MarkupSafe==2.1.2
 oauthlib==3.2.2
 Pillow==9.4.0
-psycopg2==2.9.5
+psycopg2-binary==2.9.5
 pycparser==2.21
 PyJWT==2.6.0
 python3-openid==3.2.0
@@ -37,7 +39,7 @@ six==1.16.0
 social-auth-app-django==4.0.0
 social-auth-core==4.4.0
 sqlparse==0.4.3
-typing_extensions==4.5.0
+typing-extensions==4.5.0
 uritemplate==4.1.1
 urllib3==1.26.15
 zipp==3.15.0
