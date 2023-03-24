@@ -26,6 +26,12 @@ class postSerializer(serializers.ModelSerializer):
         model = post
         fields = '__all__'
 
+class postReviewSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = postReview
+        fields = '__all__'
+
 class subscribeSerializer(serializers.ModelSerializer):
     class Meta:
         model = subscribedUsers

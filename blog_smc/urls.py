@@ -28,6 +28,7 @@ router.register(r'users', views.UserViewSet, basename='user')
 router.register(r'groups', views.GroupViewSet)
 router.register(r'categories', views.CategoryViewSet)
 router.register(r'posts', views.postViewSet, basename='posts')
+router.register(r'post/review', views.postReviewViewSet)
 router.register(r'subscribe', views.postSubscribe)
 router.register(r'comment', views.CommentViewSet, basename='comment-detail')
 

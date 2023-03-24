@@ -66,6 +66,20 @@ class post(models.Model):
     def __str__(self) -> str:
         return self.title
 
+class postReview(models.Model):
+
+    state = (
+        ('Rejected', 'Rejected'),
+        ('InReview', 'In Review'),
+        ('Approved', 'Approved'),
+    )
+    
+    post = models.ForeignKey(post, on_delete=models.CASCADE, to_field='slug')
+    review = models.CharField(max_length=200, verbose_name='Review', choices=state, default='InReview')
+
+    def __str__(self) -> str:
+        return f'({self.review}) {self.post}'
+
 class subscribedUsers(models.Model):
     email = models.EmailField(unique=True, max_length=50)
 
