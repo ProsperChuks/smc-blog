@@ -13,9 +13,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 import dj_database_url
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 
 IS_HEROKU = "DYNO" in os.environ
 # Quick-start development settings - unsuitable for production
@@ -53,12 +58,14 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'ckeditor',
     'ckeditor_uploader',
-
+    'cloudinary_storage',
+    'cloudinary',
     'allauth',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -78,7 +85,19 @@ REST_FRAMEWORK = {
     ),
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if IS_HEROKU:
+    # Twilio SendGrid
+    EMAIL_HOST = 'mail.smcdesk.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'apikey'  # Name for all the SenGrid accounts
+    EMAIL_HOST_PASSWORD = env('SENDGRID_API_KEY')
+    # The email you'll be sending emails from
+    DEFAULT_FROM_EMAIL = env('FROM_EMAIL', default='noreply@gmail.com')
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 AUTHENTICATION_BACKENDS = (
     # Needed to login by username in Django admin, regardless of `allauth`
@@ -128,7 +147,7 @@ WSGI_APPLICATION = 'blog_smc.wsgi.application'
 MAX_CONN_AGE = 600
 
 DATABASES = {
-        "default": {
+    "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.path.join(BASE_DIR, "db.sqlite3")
     }
@@ -138,7 +157,7 @@ if "DATABASE_URL" in os.environ:
     # Configure Django for DATABASE_URL environment variable.
     DATABASES["default"] = dj_database_url.config(
         conn_max_age=MAX_CONN_AGE, ssl_require=True)
-    
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -178,8 +197,20 @@ USE_TZ = True
 STATIC_URL = 'backend/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "backend/static/")
 
+# Enable WhiteNoise's GZip compression of static assets.
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 MEDIA_URL = 'backend/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "backend/media/")
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env("CLOUD_NAME"),
+    'API_KEY': env("CLOUD_API_KEY"),
+    'API_SECRET': env("CLOUD_API_SECRET"),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
@@ -203,7 +234,7 @@ CKEDITOR_ALLOW_NONIMAGE_FILES = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'backend.User'
 
-EMAIL_HOST_USER = 'admin@blog_smc'
+# EMAIL_HOST_USER = 'admin@blog_smc'
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 REST_FRAMEWORK = {
