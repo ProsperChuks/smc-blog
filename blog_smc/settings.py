@@ -92,7 +92,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://smcdesk.com',
+    'https://smcreport.com',
 )
 
 ROOT_URLCONF = 'blog_smc.urls'
