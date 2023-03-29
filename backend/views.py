@@ -121,6 +121,14 @@ class postReviewViewSet(viewsets.ModelViewSet):
     # lookup_field = 'slug'
     pagination_class = StandardResultsSetPagination
 
+    def get_queryset(self):
+
+        queryset = postReview.objects.all()
+        state = self.request.query_params.get('state')
+        if state is not None:
+            queryset = queryset.filter(review__exact=state)
+        return queryset
+
 class postSubscribe(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
