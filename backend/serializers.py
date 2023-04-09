@@ -36,6 +36,12 @@ class postSerializer(serializers.ModelSerializer):
         model = post
         fields = '__all__'
 
+class imageSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = imageShow
+        fields = '__all__'
+
 class postReviewSerializer(serializers.ModelSerializer):
     
     class Meta:

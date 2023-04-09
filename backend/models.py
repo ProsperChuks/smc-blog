@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify 
@@ -50,8 +51,11 @@ class post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, to_field='slug')
     publishedAt = models.DateTimeField(auto_now_add=True, verbose_name='Published At')
     summary = models.TextField(max_length=500, verbose_name='Summary')
+    tags = models.TextField(max_length=100, verbose_name='Tags', blank=True, null=True)
     body = RichTextField()
     mainImage = models.ImageField(upload_to='post')
+    video = models.FileField(upload_to='post/vd_uploads', blank=True, null=True)
+    image_slide = models.ManyToManyField('imageShow')
 
     class Meta:
         ordering = ('-publishedAt',)
@@ -65,6 +69,18 @@ class post(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+def update_filename(instance, filename):
+        path = "post/sldh/"
+        format = filename + instance.file_extension
+        return os.path.join(path, format)
+
+class imageShow(models.Model):
+    posts = models.ForeignKey(post, on_delete=models.CASCADE, to_field='slug')
+    image_slide = models.ImageField(upload_to=update_filename, null=True)
+
+    def __str__(self) -> str:
+        return str(self.image_slide)
 
 class postReview(models.Model):
 
