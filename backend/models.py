@@ -51,7 +51,7 @@ class post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, to_field='slug')
     publishedAt = models.DateTimeField(auto_now_add=True, verbose_name='Published At')
     summary = models.TextField(max_length=500, verbose_name='Summary')
-    tags = models.TextField(max_length=100, verbose_name='Tags', blank=True, null=True)
+    sub_topic = models.TextField(max_length=100, verbose_name='Sub Topic', blank=True, null=True)
     body = RichTextField()
     mainImage = models.ImageField(upload_to='post')
     video = models.FileField(upload_to='post/vd_uploads', blank=True, null=True)
