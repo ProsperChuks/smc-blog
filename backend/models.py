@@ -1,15 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils.text import slugify 
+from django.utils.text import slugify
 from ckeditor.fields import RichTextField
-
+from django.contrib.postgres.fields import ArrayField
 # Create your models here.
+
+
 class User(AbstractUser):
-    name = models.CharField(max_length=200, verbose_name='Name', help_text='Name to be displayed under blog posts')
-    slug =  models.SlugField(max_length=5500, verbose_name='Slug', unique=True, blank=False, null=False)
-    image = models.ImageField(upload_to='author', verbose_name='Image', blank=True, null=True)
+    name = models.CharField(max_length=200, verbose_name='Name',
+                            help_text='Name to be displayed under blog posts')
+    slug = models.SlugField(
+        max_length=5500, verbose_name='Slug', unique=True, blank=False, null=False)
+    image = models.ImageField(
+        upload_to='author', verbose_name='Image', blank=True, null=True)
     bio = models.TextField(verbose_name='Bio', blank=True, null=True)
-    email = models.EmailField(unique=True, max_length=50,  blank=False, null=False)
+    email = models.EmailField(
+        unique=True, max_length=50,  blank=False, null=False)
 
     def get_absolute_url(self):
         return f'/{self.slug}/'
@@ -21,6 +27,7 @@ class User(AbstractUser):
     def __str__(self) -> str:
         return self.name
 
+
 class category(models.Model):
 
     cat = (
@@ -30,12 +37,14 @@ class category(models.Model):
         ('geopolitics', 'Geopolitics')
     )
 
-    cat_title = models.CharField(max_length=200, verbose_name='Category Title', choices=cat, default='---')
-    slug =  models.SlugField(max_length=5500, verbose_name='Slug', unique=True)
+    cat_title = models.CharField(
+        max_length=200, verbose_name='Category Title', choices=cat, default='---')
+    slug = models.SlugField(max_length=5500, verbose_name='Slug', unique=True)
     # description = models.TextField(max_length=500, verbose_name='Category Description')
-    
+
     def __str__(self) -> str:
         return self.cat_title
+
 
 class post(models.Model):
 
@@ -45,10 +54,11 @@ class post(models.Model):
         to_field='slug'
     )
     title = models.CharField(max_length=200, verbose_name='Title')
-    slug =  models.SlugField(max_length=5500, verbose_name='Slug', unique=True)
+    slug = models.SlugField(max_length=5500, verbose_name='Slug', unique=True)
     picked = models.BooleanField(verbose_name='Editors Pick')
     author = models.ForeignKey(User, on_delete=models.CASCADE, to_field='slug')
-    publishedAt = models.DateTimeField(auto_now_add=True, verbose_name='Published At')
+    publishedAt = models.DateTimeField(
+        auto_now_add=True, verbose_name='Published At')
     summary = models.TextField(max_length=500, verbose_name='Summary')
     body = RichTextField()
     mainImage = models.ImageField(upload_to='post')
@@ -66,6 +76,7 @@ class post(models.Model):
     def __str__(self) -> str:
         return self.title
 
+
 class postReview(models.Model):
 
     state = (
@@ -73,18 +84,21 @@ class postReview(models.Model):
         ('InReview', 'In Review'),
         ('Approved', 'Approved'),
     )
-    
+
     post = models.ForeignKey(post, on_delete=models.CASCADE, to_field='slug')
-    review = models.CharField(max_length=200, verbose_name='Review', choices=state, default='InReview')
+    review = models.CharField(
+        max_length=200, verbose_name='Review', choices=state, default='InReview')
 
     def __str__(self) -> str:
         return f'({self.review}) {self.post}'
+
 
 class subscribedUsers(models.Model):
     email = models.EmailField(unique=True, max_length=50)
 
     def __str__(self) -> str:
         return self.email
+
 
 class comment(models.Model):
     post = models.ForeignKey(post, on_delete=models.CASCADE, to_field='slug')
@@ -99,3 +113,22 @@ class comment(models.Model):
 
     def __str__(self):
         return 'Comment {} by {}'.format(self.body, self.name)
+
+
+class CoinIndex(models.Model):
+    coin_ids = ArrayField(models.IntegerField(), default=list,
+                          null=False, blank=False, unique=True)
+
+    class Meta:
+        verbose_name = "Coin"
+        verbose_name_plural = "Coins"
+
+    def add_coin_id(self, coin_id):
+        if coin_id not in self.coin_ids:
+            self.coin_ids.append(coin_id)
+            self.save()
+
+    def remove_coin_id(self, coin_id):
+        if coin_id in self.coin_ids:
+            self.coin_ids.remove(coin_id)
+            self.save()

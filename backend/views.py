@@ -1,15 +1,23 @@
-import smtplib, ssl
+import smtplib
+import ssl
 from django.contrib.auth import login
 from django.contrib.auth.models import User, Group
 from .models import *
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, action
 from rest_framework import status
 from .serializers import *
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
 from rest_framework.pagination import PageNumberPagination
+
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+from django.conf import settings
+import json
+
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
@@ -17,6 +25,8 @@ class StandardResultsSetPagination(PageNumberPagination):
     max_page_size = 100
 
 # Create your views here.
+
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -33,6 +43,7 @@ class UserViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(email=user)
         return queryset
 
+
 class GroupViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -41,6 +52,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -48,6 +60,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'slug'
+
 
 class postViewSet(viewsets.ModelViewSet):
     """
@@ -79,14 +92,15 @@ class postViewSet(viewsets.ModelViewSet):
         serializer = postSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            subscribers_queryset = [mail.email for mail in subscribedUsers.objects.all()]
+            subscribers_queryset = [
+                mail.email for mail in subscribedUsers.objects.all()]
             PORT = 465
             smtp_server = 'smtp.mail.yahoo.com'
             login = 'pchukwudi36@yahoo.com'
             password = 'yttwsfqiqjtkymlu'
             email_from = 'pchukwudi36@yahoo.com'
             recipient_list = subscribers_queryset
-            
+
             text = f"""
             <h3>{request.data["title"]}</h3><br>
             <img src="{request.data["mainImage"]}" alt="Poster">
@@ -112,6 +126,7 @@ class postViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class postReviewViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -120,6 +135,7 @@ class postReviewViewSet(viewsets.ModelViewSet):
     serializer_class = postReviewSerializer
     # lookup_field = 'slug'
     pagination_class = StandardResultsSetPagination
+
 
 class postSubscribe(viewsets.ModelViewSet):
     """
@@ -140,7 +156,7 @@ class postSubscribe(viewsets.ModelViewSet):
             email_from = 'pchukwudi36@yahoo.com'
             recipient_list = [email, ]
             print(email)
-            
+
             text = """Thanks for subscribing to our Newsletter. \nYou will get notification of latest articles posted on our website. Please do not reply on this email."""
 
             message = EmailMessage()
@@ -162,13 +178,14 @@ class postSubscribe(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = comment.objects.all().order_by('-created_on')
     serializer_class = commentSerializer
-    
+
     def get_queryset(self):
 
         queryset = comment.objects.all().order_by('-created_on')
@@ -178,7 +195,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         return queryset
 
     def create(self, request):
-        serializer = commentSerializer(data=request.data, context={"request": request})
+        serializer = commentSerializer(
+            data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -189,3 +207,107 @@ class CommentViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CoinIndexViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows price index marquee to be viewed or edited.
+    """
+    queryset = CoinIndex.objects.all()
+    serializer_class = coinIndexSerializer
+
+    def list(self, request, *args, **kwargs):
+        coin_index = CoinIndex.objects.first()
+        serializer = self.get_serializer(coin_index)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        coin_index, created = CoinIndex.objects.get_or_create(pk=1)
+        coin_ids = request.data.get('coin_ids', [])
+        for coin_id in coin_ids:
+            coin_index.add_coin_id(coin_id)
+        serializer = self.get_serializer(coin_index)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        coin_id = kwargs.get('pk')
+        coin_index = CoinIndex.objects.first()
+        if coin_id is not None and coin_id.isdigit():
+            coin_index.remove_coin_id(int(coin_id))
+        serializer = self.get_serializer(coin_index)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_cryptocurrency_map(request):
+    start = request.query_params.get('start') or '1'
+    limit = request.query_params.get('limit') or '500'
+    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map'
+    parameters = {
+        'start': start,
+        'limit': limit,
+        'aux': 'is_active'
+    }
+    headers = {
+        'Accepts': 'application/json',
+        'X-CMC_PRO_API_KEY': settings.CMC_API_KEY,
+    }
+
+    session = Session()
+    session.headers.update(headers)
+
+    try:
+        response = session.get(url, params=parameters)
+        data = json.loads(response.text)
+        return Response(data)
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        return Response({"error": "Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def get_cryptocurrency_listings(request):
+    start = request.query_params.get('start') or '1'
+    limit = request.query_params.get('limit') or '500'
+    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+    parameters = {
+        'start': start,
+        'limit': limit,
+        'aux': 'is_active',
+    }
+    headers = {
+        'Accepts': 'application/json',
+        'X-CMC_PRO_API_KEY': settings.CMC_API_KEY,
+    }
+
+    session = Session()
+    session.headers.update(headers)
+
+    try:
+        response = session.get(url, params=parameters)
+        data = json.loads(response.text)
+        return Response(data)
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        return Response({"error": "Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def get_cryptocurrency_quotes(request):
+    url = 'https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest'
+    parameters = {
+        'aux': 'is_active',
+        'id': request.query_params.get('id') or '1,20700,23241,1027,74,5426,1839'
+    }
+    headers = {
+        'Accepts': 'application/json',
+        'X-CMC_PRO_API_KEY': settings.CMC_API_KEY,
+    }
+
+    session = Session()
+    session.headers.update(headers)
+
+    try:
+        response = session.get(url, params=parameters)
+        data = json.loads(response.text)
+        return Response(data)
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        return Response({"error": "Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -28,7 +28,7 @@ IS_HEROKU = "DYNO" in os.environ
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-ywz!bd#r_02!vp^5!&6-j7h+)0xl)424fwc)pa8vu^0c(35&!0'
-
+CMC_API_KEY = env("CMC_API_KEY")
 if 'SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ["SECRET_KEY"]
 
@@ -119,6 +119,7 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://smcreport.com',
+    'https://smcreport.netlify.app'
 )
 
 ROOT_URLCONF = 'blog_smc.urls'

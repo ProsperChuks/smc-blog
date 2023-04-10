@@ -31,6 +31,7 @@ router.register(r'posts', views.postViewSet, basename='posts')
 router.register(r'post/review', views.postReviewViewSet)
 router.register(r'subscribe', views.postSubscribe)
 router.register(r'comment', views.CommentViewSet, basename='comment-detail')
+router.register(r'coins', views.CoinIndexViewSet, basename='coin')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,7 +40,14 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/auth/', include('djoser.urls.authtoken')),
     path(r'ckeditor/upload/', ckeditor_views.upload, name='ckeditor_upload'),
-    path(r'ckeditor/browse/', never_cache(ckeditor_views.browse), name='ckeditor_browse'),
+    path(r'ckeditor/browse/', never_cache(ckeditor_views.browse),
+         name='ckeditor_browse'),
+    path('api/cmc/map', views.get_cryptocurrency_map,
+         name='get_cryptocurrency_map'),
+    path('api/cmc/listings', views.get_cryptocurrency_listings,
+         name='get_cryptocurrency_listings'),
+    path('api/cmc/quotes', views.get_cryptocurrency_quotes,
+         name='get_cryptocurrency_quotes'),
 ]
 
 if settings.DEBUG:

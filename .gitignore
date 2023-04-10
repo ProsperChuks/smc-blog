@@ -2,3 +2,8 @@
 *.sqlite3
 __pycache__/
 .env
+target/
+
+# Python # 
+*.py[cod] 
+*$py.class 
