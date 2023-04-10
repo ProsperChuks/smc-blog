@@ -8,7 +8,18 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ['user_permissions', 'is_active', 'is_staff', 'last_name', 'first_name',
-                   'is_superuser', 'last_login', 'date_joined']
+                   'last_login', 'date_joined']
+
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            name=validated_data['name'],
+            slug=validated_data['slug'],
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class GroupSerializer(serializers.ModelSerializer):
