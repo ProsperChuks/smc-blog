@@ -1,4 +1,5 @@
 import os
+import smtplib, ssl
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify 
@@ -6,7 +7,9 @@ from ckeditor.fields import RichTextField
 from django.dispatch import receiver
 from django.urls import reverse
 from django_rest_passwordreset.signals import reset_password_token_created
-from django.core.mail import send_mail 
+from django.core.mail import send_mail
+from email.message import EmailMessage
+from email.utils import formatdate, make_msgid
 
 # Create your models here.
 class User(AbstractUser):
@@ -123,15 +126,28 @@ class comment(models.Model):
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
 
-    email_plaintext_message = "{}?token={}".format(reverse('password_reset:reset-password-request'), reset_password_token.key)
+    email = reset_password_token.user.email
+    PORT = 465
+    smtp_server = 'smtp.mail.yahoo.com'
+    login = 'pchukwudi36@yahoo.com'
+    password = 'yttwsfqiqjtkymlu'
+    email_from = 'pchukwudi36@yahoo.com'
+    recipient_list = [email, ]
 
-    send_mail(
-        # title:
-        "Password Reset for {title}".format(title="SMC Blog"),
-        # message:
-        email_plaintext_message,
-        # from:
-        "noreply@smcblog.com",
-        # to:
-        [reset_password_token.user.email]
-    )
+    email_plaintext_message = "{}?token={}".format(reverse('password_reset:reset-password-request'), reset_password_token.key)
+    text = f"""<b><h2>Reset Password</h2></b><br>Click the link to reset your password.<br> http://127.0.0.1:8000{email_plaintext_message}"""
+
+    message = EmailMessage()
+    message['From'] = email_from
+    message['To'] = f'{email}'
+    message['Subject'] = "Password Reset for {title}".format(title="SMC Blog")
+    message['Date'] = formatdate(localtime=True)
+    message['Message-ID'] = make_msgid()
+    message.add_alternative(text, subtype='html')
+
+    with smtplib.SMTP_SSL(smtp_server, PORT) as server:
+        server.set_debuglevel(1)
+        server.ehlo()
+        server.login(login, password)
+        server.send_message(message, email_from, recipient_list)
+        server.quit()
