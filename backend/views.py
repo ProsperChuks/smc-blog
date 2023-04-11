@@ -2,7 +2,7 @@ import smtplib, ssl
 from django.contrib.auth import login
 from django.contrib.auth.models import User, Group
 from .models import *
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +10,8 @@ from .serializers import *
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
@@ -33,6 +35,42 @@ class UserViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(email=user)
         return queryset
 
+class ChangePasswordView(generics.UpdateAPIView):
+    """
+    An endpoint for changing password.
+    """
+    serializer_class = ChangePasswordSerializer
+    model = User
+    permission_classes = [permissions.IsAuthenticated,]
+    authentication_classes = (TokenAuthentication,)
+
+    def get_object(self, queryset=None):
+        user_id = Token.objects.get(key=self.request.auth.key).user
+        obj = User.objects.get(name=user_id)
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': 'Password updated successfully',
+                'data': []
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class GroupViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -40,6 +78,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """

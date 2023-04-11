@@ -20,6 +20,15 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    """
+    Serializer for password change endpoint.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
