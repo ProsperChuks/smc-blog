@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'djoser',
+    'django_rest_passwordreset',
     'rest_framework.authtoken',
     'ckeditor',
     'ckeditor_uploader',
@@ -77,10 +78,10 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    ],
+    ),
 
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -120,7 +121,7 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://smcreport.com',
-    'https://smcreport.netlify.app'
+    'https://smcreport.netlify.app',
 )
 
 ROOT_URLCONF = 'blog_smc.urls'

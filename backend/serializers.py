@@ -22,6 +22,16 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    """
+    Serializer for password change endpoint.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
@@ -38,6 +48,13 @@ class postSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = post
+        fields = '__all__'
+
+
+class imageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = imageShow
         fields = '__all__'
 
 

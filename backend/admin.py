@@ -19,6 +19,7 @@ UserAdmin.add_fieldsets = (
 admin.site.register(User, UserAdmin)
 admin.site.register(category,)
 admin.site.register(post)
+admin.site.register(imageShow)
 admin.site.register(postReview)
 admin.site.register(subscribedUsers)
 admin.site.register(comment)

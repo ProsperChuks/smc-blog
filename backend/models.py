@@ -1,7 +1,16 @@
+import os
+import smtplib
+import ssl
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify
 from ckeditor.fields import RichTextField
+from django.dispatch import receiver
+from django.urls import reverse
+from django_rest_passwordreset.signals import reset_password_token_created
+from django.core.mail import send_mail
+from email.message import EmailMessage
+from email.utils import formatdate, make_msgid
 from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 
@@ -60,8 +69,13 @@ class post(models.Model):
     publishedAt = models.DateTimeField(
         auto_now_add=True, verbose_name='Published At')
     summary = models.TextField(max_length=500, verbose_name='Summary')
+    sub_topic = models.TextField(
+        max_length=100, verbose_name='Sub Topic', blank=True, null=True)
     body = RichTextField()
     mainImage = models.ImageField(upload_to='post')
+    video = models.FileField(
+        upload_to='post/vd_uploads', blank=True, null=True)
+    image_slide = models.ManyToManyField('imageShow')
 
     class Meta:
         ordering = ('-publishedAt',)
@@ -75,6 +89,20 @@ class post(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+def update_filename(instance, filename):
+    path = "post/sldh/"
+    format = filename + instance.file_extension
+    return os.path.join(path, format)
+
+
+class imageShow(models.Model):
+    posts = models.ForeignKey(post, on_delete=models.CASCADE, to_field='slug')
+    image_slide = models.ImageField(upload_to=update_filename, null=True)
+
+    def __str__(self) -> str:
+        return str(self.image_slide)
 
 
 class postReview(models.Model):
@@ -113,6 +141,37 @@ class comment(models.Model):
 
     def __str__(self):
         return 'Comment {} by {}'.format(self.body, self.name)
+
+
+@receiver(reset_password_token_created)
+def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
+
+    email = reset_password_token.user.email
+    PORT = 465
+    smtp_server = 'smtp.mail.yahoo.com'
+    login = 'pchukwudi36@yahoo.com'
+    password = 'yttwsfqiqjtkymlu'
+    email_from = 'pchukwudi36@yahoo.com'
+    recipient_list = [email, ]
+
+    email_plaintext_message = "{}?token={}".format(
+        reverse('password_reset:reset-password-request'), reset_password_token.key)
+    text = f"""<b><h2>Reset Password</h2></b><br>Click the link to reset your password.<br> http://127.0.0.1:8000{email_plaintext_message}"""
+
+    message = EmailMessage()
+    message['From'] = email_from
+    message['To'] = f'{email}'
+    message['Subject'] = "Password Reset for {title}".format(title="SMC Blog")
+    message['Date'] = formatdate(localtime=True)
+    message['Message-ID'] = make_msgid()
+    message.add_alternative(text, subtype='html')
+
+    with smtplib.SMTP_SSL(smtp_server, PORT) as server:
+        server.set_debuglevel(1)
+        server.ehlo()
+        server.login(login, password)
+        server.send_message(message, email_from, recipient_list)
+        server.quit()
 
 
 class CoinIndex(models.Model):
