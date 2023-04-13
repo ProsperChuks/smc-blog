@@ -88,6 +88,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = 'slug'
 
+class VideoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = post.objects.all().values('slug', 'video')
+    serializer_class = postVideoSerializer
+
 class postViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
