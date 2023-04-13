@@ -62,7 +62,7 @@ class post(models.Model):
     body = RichTextField()
     mainImage = models.ImageField(upload_to='post')
     video = models.FileField(upload_to='post/vd_uploads', blank=True, null=True)
-    image_slide = models.ManyToManyField('imageShow')
+    image_slide = models.ManyToManyField('imageShow', blank=True)
 
     class Meta:
         ordering = ('-publishedAt',)
@@ -84,7 +84,7 @@ def update_filename(instance, filename):
 
 class imageShow(models.Model):
     posts = models.ForeignKey(post, on_delete=models.CASCADE, to_field='slug')
-    image_slide = models.ImageField(upload_to=update_filename, null=True)
+    image_slide = models.ImageField(upload_to="post/sldh/", null=True)
 
     def __str__(self) -> str:
         return str(self.image_slide)
