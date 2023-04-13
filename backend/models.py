@@ -62,7 +62,7 @@ class post(models.Model):
     body = RichTextField()
     mainImage = models.ImageField(upload_to='post')
     video = models.FileField(upload_to='post/vd_uploads', blank=True, null=True)
-    image_slide = models.ManyToManyField('imageShow')
+    image_slide = models.ManyToManyField('imageShow', blank=True)
 
     class Meta:
         ordering = ('-publishedAt',)
