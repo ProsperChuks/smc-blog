@@ -14,6 +14,8 @@ from email.utils import formatdate, make_msgid
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
