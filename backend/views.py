@@ -159,6 +159,14 @@ class imageViewSet(viewsets.ModelViewSet):
     serializer_class = imageSerializer
     # lookup_field = 'image_slide'
 
+    def get_queryset(self):
+
+        queryset = imageShow.objects.all()
+        post = self.request.query_params.get('post')
+        if post is not None:
+            queryset = queryset.filter(posts=post)
+        return queryset
+
 class postReviewViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.

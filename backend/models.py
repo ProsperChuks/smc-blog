@@ -84,7 +84,7 @@ def update_filename(instance, filename):
 
 class imageShow(models.Model):
     posts = models.ForeignKey(post, on_delete=models.CASCADE, to_field='slug')
-    image_slide = models.ImageField(upload_to=update_filename, null=True)
+    image_slide = models.ImageField(upload_to="post/sldh/", null=True)
 
     def __str__(self) -> str:
         return str(self.image_slide)
