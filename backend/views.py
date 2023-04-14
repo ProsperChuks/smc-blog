@@ -92,8 +92,11 @@ class VideoViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
-    queryset = post.objects.all().values('slug', 'video')
+    queryset = post.objects.all()
     serializer_class = postVideoSerializer
+
+    def get_queryset(self):
+        return self.queryset
 
 class postViewSet(viewsets.ModelViewSet):
     """
