@@ -1,4 +1,7 @@
 import os
+import requests
+import secrets
+import string
 import smtplib, ssl
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -10,6 +13,7 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from django.core.mail import send_mail
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
+from django.contrib.sites.models import Site
 
 # Create your models here.
 class User(AbstractUser):
@@ -123,6 +127,20 @@ class comment(models.Model):
     def __str__(self):
         return 'Comment {} by {}'.format(self.body, self.name)
 
+def generate_pwd(pwd_length):
+
+    letters = string.ascii_letters
+    digits = string.digits
+    special_chars = string.punctuation
+
+    alphabet = letters + digits + special_chars
+
+    pwd = ''
+    for i in range(pwd_length):
+        pwd += ''.join(secrets.choice(alphabet))
+
+    return pwd
+
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
 
@@ -134,20 +152,32 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
     email_from = 'pchukwudi36@yahoo.com'
     recipient_list = [email, ]
 
-    email_plaintext_message = "{}?token={}".format(reverse('password_reset:reset-password-request'), reset_password_token.key)
-    text = f"""<b><h2>Reset Password</h2></b><br>Click the link to reset your password.<br> http://127.0.0.1:8000{email_plaintext_message}"""
+    host = Site.objects.get_current().domain
+    endpoint = '/api/password_reset/confirm/'
+    url = f'https://smc-blog-backend.herokuapp.com/{endpoint}'
+    new_pwd = generate_pwd(12)
+    data = {'token': reset_password_token.key, 'password': new_pwd}
 
-    message = EmailMessage()
-    message['From'] = email_from
-    message['To'] = f'{email}'
-    message['Subject'] = "Password Reset for {title}".format(title="SMC Blog")
-    message['Date'] = formatdate(localtime=True)
-    message['Message-ID'] = make_msgid()
-    message.add_alternative(text, subtype='html')
+    try:
+        r = requests.post(url, data=data)
+        text = f"""<b><h2>Password Reset Successfully</h2></b>Your Password has been Reset Successfully<br>Your password is: {new_pwd}<br>Login to your profile and change your password."""
 
-    with smtplib.SMTP_SSL(smtp_server, PORT) as server:
-        server.set_debuglevel(1)
-        server.ehlo()
-        server.login(login, password)
-        server.send_message(message, email_from, recipient_list)
-        server.quit()
+        message = EmailMessage()
+        message['From'] = email_from
+        message['To'] = f'{email}'
+        message['Subject'] = "Password Reset for {title}".format(title="SMC Blog")
+        message['Date'] = formatdate(localtime=True)
+        message['Message-ID'] = make_msgid()
+        message.add_alternative(text, subtype='html')
+
+        with smtplib.SMTP_SSL(smtp_server, PORT) as server:
+            server.set_debuglevel(1)
+            server.ehlo()
+            server.login(login, password)
+            server.send_message(message, email_from, recipient_list)
+            server.quit()
+        r.raise_for_status()
+    except requests.exceptions.HTTPError as errh:
+        print("HTTP Error")
+        print(errh.args[0])
+    print(r)
