@@ -153,7 +153,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
     recipient_list = [email, ]
 
     host = Site.objects.get_current().domain
-    endpoint = '/api/password_reset/confirm/'
+    endpoint = 'api/password_reset/confirm/'
     url = f'https://smc-blog-backend.herokuapp.com/{endpoint}'
     new_pwd = generate_pwd(12)
     data = {'token': reset_password_token.key, 'password': new_pwd}
