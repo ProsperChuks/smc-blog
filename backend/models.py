@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from email.message import EmailMessage
 from email.utils import formatdate, make_msgid
 from django.contrib.postgres.fields import ArrayField
+from django.conf import settings
 # Create your models here.
 
 
@@ -147,11 +148,11 @@ class comment(models.Model):
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
 
     email = reset_password_token.user.email
-    PORT = 465
-    smtp_server = 'smtp.mail.yahoo.com'
-    login = 'pchukwudi36@yahoo.com'
-    password = 'yttwsfqiqjtkymlu'
-    email_from = 'pchukwudi36@yahoo.com'
+    PORT = settings.EMAIL_PORT
+    smtp_server = settings.EMAIL_HOST
+    login = settings.EMAIL_HOST_USER
+    password = settings.EMAIL_HOST_PASSWORD
+    email_from = login
     recipient_list = [email, ]
 
     email_plaintext_message = "{}?token={}".format(

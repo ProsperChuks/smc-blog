@@ -301,11 +301,13 @@ class CoinIndexViewSet(viewsets.ModelViewSet):
 def get_cryptocurrency_map(request):
     start = request.query_params.get('start') or '1'
     limit = request.query_params.get('limit') or '500'
+    sort = request.query_params.get('sort') or 'cmc_rank'
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map'
     parameters = {
         'start': start,
         'limit': limit,
-        'aux': 'is_active'
+        'aux': 'is_active',
+        'sort': sort
     }
     headers = {
         'Accepts': 'application/json',
