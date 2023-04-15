@@ -136,11 +136,11 @@ class postViewSet(viewsets.ModelViewSet):
             serializer.save()
             subscribers_queryset = [
                 mail.email for mail in subscribedUsers.objects.all()]
-            PORT = 465
-            smtp_server = 'smtp.mail.yahoo.com'
-            login = 'pchukwudi36@yahoo.com'
-            password = 'yttwsfqiqjtkymlu'
-            email_from = 'pchukwudi36@yahoo.com'
+            PORT = settings.EMAIL_PORT
+            smtp_server = settings.EMAIL_HOST
+            login = settings.EMAIL_HOST_USER
+            password = settings.EMAIL_HOST_PASSWORD
+            email_from = login
             recipient_list = subscribers_queryset
 
             text = f"""
@@ -151,7 +151,7 @@ class postViewSet(viewsets.ModelViewSet):
             <a href='#'>Read More</a>"""
 
             message = EmailMessage()
-            message['From'] = 'pchukwudi36@yahoo.com'
+            message['From'] = email_from
             message['Subject'] = f'New Blog Post: {request.data["title"]}'
             message['Date'] = formatdate(localtime=True)
             message['Message-ID'] = make_msgid()
@@ -208,18 +208,18 @@ class postSubscribe(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             email = request.data['email']
-            PORT = 465
-            smtp_server = 'smtp.mail.yahoo.com'
-            login = 'pchukwudi36@yahoo.com'
-            password = 'yttwsfqiqjtkymlu'
-            email_from = 'pchukwudi36@yahoo.com'
+            PORT = settings.EMAIL_PORT
+            smtp_server = settings.EMAIL_HOST
+            login = settings.EMAIL_HOST_USER
+            password = settings.EMAIL_HOST_PASSWORD
+            email_from = login
             recipient_list = [email, ]
             print(email)
 
             text = """Thanks for subscribing to our Newsletter. \nYou will get notification of latest articles posted on our website. Please do not reply on this email."""
 
             message = EmailMessage()
-            message['From'] = 'pchukwudi36@yahoo.com'
+            message['From'] = email_from
             message['To'] = f'{email}'
             message['Subject'] = 'NewsLetter Subscription'
             message['Date'] = formatdate(localtime=True)
