@@ -43,6 +43,13 @@ else:
 
 # Application definition
 
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://smcreport.com',
+    'https://smcreport.netlify.app',
+)
+
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -66,12 +73,12 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -115,13 +122,6 @@ ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
-
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'https://smcreport.com',
-    'https://smcreport.netlify.app',
-)
 
 ROOT_URLCONF = 'blog_smc.urls'
 
