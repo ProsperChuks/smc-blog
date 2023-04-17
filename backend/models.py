@@ -157,7 +157,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 
     email_plaintext_message = "{}?token={}".format(
         reverse('password_reset:reset-password-request'), reset_password_token.key)
-    text = f"""<b><h2>Reset Password</h2></b><br>Click the link to reset your password.<br> http://127.0.0.1:8000{email_plaintext_message}"""
+    text = f"""<b><h2>Reset Password</h2></b><br>Click the link to reset your password.<br/><br/> <a href='https:/smc-blog-backend.herokuapp.com{email_plaintext_message}'>Reset Link</a>"""
 
     message = EmailMessage()
     message['From'] = email_from
