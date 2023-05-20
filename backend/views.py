@@ -142,17 +142,19 @@ class postViewSet(viewsets.ModelViewSet):
             password = settings.EMAIL_HOST_PASSWORD
             email_from = login
             recipient_list = subscribers_queryset
+            transformed_image = "/image/upload/h_650,w_600".join(
+                serializer.data["mainImage"].split("/image/upload"))
 
             text = f"""
-            <h3>{request.data["title"]}</h3><br>
-            <img src="{request.data["mainImage"]}" alt="Poster">
+            <h3>{serializer.data['title']}</h3><br>
+            <img src="{transformed_image}" alt="{serializer.data['author']}'s post">
             <br>
-            <p>{request.data["summary"]}</p>
-            <a href='#'>Read More</a>"""
+            <p>{serializer.data['summary']}</p>
+            <a href="https://smcreport.com/post/{serializer.data['slug']}">Read More</a>"""
 
             message = EmailMessage()
-            message['From'] = email_from
-            message['Subject'] = f'New Blog Post: {request.data["title"]}'
+            message['From'] = f"SMC Report NewsLetter <{email_from}>"
+            message['Subject'] = f'New Blog Post: {serializer.data["title"]}'
             message['Date'] = formatdate(localtime=True)
             message['Message-ID'] = make_msgid()
             message.set_content(text, subtype='html')
