@@ -29,6 +29,7 @@ router.register(r'groups', views.GroupViewSet)
 router.register(r'categories', views.CategoryViewSet)
 router.register(r'posts', views.postViewSet, basename='posts')
 router.register(r'images', views.imageViewSet)
+router.register(r'videos', views.VideoViewSet)
 router.register(r'post/review', views.postReviewViewSet)
 router.register(r'subscribe', views.postSubscribe)
 router.register(r'comment', views.CommentViewSet, basename='comment-detail')
@@ -40,8 +41,10 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/auth/', include('djoser.urls.authtoken')),
-    path('api/change-password/', views.ChangePasswordView.as_view(), name='change-password'),
-    path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path('api/change-password/', views.ChangePasswordView.as_view(),
+         name='change-password'),
+    path('api/password_reset/',
+         include('django_rest_passwordreset.urls', namespace='password_reset')),
     path(r'ckeditor/upload/', ckeditor_views.upload, name='ckeditor_upload'),
     path(r'ckeditor/browse/', never_cache(ckeditor_views.browse),
          name='ckeditor_browse'),
@@ -51,7 +54,7 @@ urlpatterns = [
          name='get_cryptocurrency_listings'),
     path('api/cmc/quotes', views.get_cryptocurrency_quotes,
          name='get_cryptocurrency_quotes'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()

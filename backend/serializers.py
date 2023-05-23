@@ -44,6 +44,13 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class postVideoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = post
+        fields = ['slug', 'video']
+
+
 class postSerializer(serializers.ModelSerializer):
 
     class Meta:

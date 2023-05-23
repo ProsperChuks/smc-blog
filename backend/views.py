@@ -104,6 +104,17 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
 
+class VideoViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = post.objects.all()
+    serializer_class = postVideoSerializer
+
+    def get_queryset(self):
+        return self.queryset
+
+
 class postViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -178,6 +189,14 @@ class imageViewSet(viewsets.ModelViewSet):
     queryset = imageShow.objects.all()
     serializer_class = imageSerializer
     # lookup_field = 'image_slide'
+
+    def get_queryset(self):
+
+        queryset = imageShow.objects.all()
+        post = self.request.query_params.get('post')
+        if post is not None:
+            queryset = queryset.filter(posts=post)
+        return queryset
 
 
 class postReviewViewSet(viewsets.ModelViewSet):
