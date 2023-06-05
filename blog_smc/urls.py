@@ -54,7 +54,7 @@ urlpatterns = [
          name='get_cryptocurrency_listings'),
     path('api/cmc/quotes', views.get_cryptocurrency_quotes,
          name='get_cryptocurrency_quotes'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
